@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum userPermit {
+  ADMIN
+  USER
+}
+
+model User {
+  id             Int               @id @default(autoincrement())
+  username       String            @unique
+  password       String
+  email          String            @unique
+  mobilePhone    String               @unique
+  userRole       userPermit        @default(USER)
+  profileImage   String?
+  prchasedByUser PurchasedByUser[]
+  Comment        Comment[]
+  userWallet     UserWallet[]
+}
+
+model PurchasedByUser {
+  id            Int      @id @default(autoincrement())
+  mangaPurchasd Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  mangaId       Int?
+  manga         Manga?   @relation(fields: [mangaId], references: [id])
+}
+
+model Manga {
+  id              Int               @id @default(autoincrement())
+  mangaName       String?           @unique
+  mangaPrice      Int
+  updateAt        DateTime          @updatedAt
+  createAt        DateTime          @default(now())
+  PurchasedByUser PurchasedByUser[]
+}
+
+model Comment {
+  id       Int      @id @default(autoincrement())
+  message  String?  @db.VarChar(255)
+  createAt DateTime @default(now())
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model UserWallet {
+  id           Int            @id @default(autoincrement())
+  userCoin     Int            @default(0)
+  userMoney    Int            @default(0)
+  updateAt     DateTime       @updatedAt
+  userId       Int
+  user         User           @relation(fields: [userId], references: [id])
+  coinExchange CoinExchange[]
+}
+
+model CoinExchange {
+  id             Int          @id @default(autoincrement())
+  userWalletId   Int          @unique
+  userWallet     UserWallet   @relation(fields: [userWalletId], references: [id])
+  exchangeRateId Int          @unique
+  exchangeRate   ExchangeRate @relation(fields: [exchangeRateId], references: [id])
+  payment        Payment      @relation(fields: [paymentId], references: [id])
+  paymentId      Int
+}
+
+enum userCheckPaymentStatus {
+  ALREADY
+  CHECKING
+}
+
+model ExchangeRate {
+  id               Int            @id @default(autoincrement())
+  bath             Int
+  coin             Int
+  createAt         DateTime       @default(now())
+  exchangeUpdateAt DateTime       @updatedAt
+  coinExchange     CoinExchange[]
+}
+
+model Payment {
+  id                Int                    @id @default(autoincrement())
+  paymentImage      String
+  userPaymentNumber userCheckPaymentStatus
+  BankName          String
+  BankNumber        Int
+  updateAccout      DateTime               @updatedAt
+  coinExchange      CoinExchange[]
+}

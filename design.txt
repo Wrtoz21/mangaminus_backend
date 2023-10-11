@@ -1,0 +1,6 @@
+REGISTER
+POST -> /mangaUser/register
+BODY ->username,password,email,mobilePhone
+RESPONE
+201 { accessToken: String, user: { id: Number, firstName: String } }
+500 { message: String }
