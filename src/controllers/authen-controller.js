@@ -16,15 +16,23 @@ exports.register = async (req, res, next) => {
         })
         // console.log(checkUsername)
         if(!!checkUsername){
-            res.status(400).json({message:"This user already used"})
+            res.status(400).json({message:"This user already used",fieldError: 'username'})
         }
 
         const checkEmail = await prisma.user.findUnique({
             where:{email:value.email}
         })
-        if(checkEmail){
-            res.status(400).json({message:"This email already used"})
+        if(!!checkEmail){
+            res.status(400).json({message:"This email already used",fieldError:'email'})
         }
+
+        const checkmobilePhone = await prisma.user.findUnique({
+            where:{mobilePhone:value.mobilePhone}
+        })
+        if(!!checkmobilePhone){
+            res.status(400).json({message:"This mobilePhone already used",fieldError:'mobilePhone'})
+        }
+
 
         value.password = await bcrypt.hash(value.password, 10)
         await prisma.user.create({
