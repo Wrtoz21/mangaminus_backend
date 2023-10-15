@@ -7,30 +7,30 @@ const createError = require('../utils/create-error')
 exports.register = async (req, res, next) => {
     try {
         const { value, error } = registerSchema.validate(req.body);
-    //    console.log(value, "value")
+        //    console.log(value, "value")
         if (error) {
             return next(error)
         }
         const checkUsername = await prisma.user.findUnique({
-            where:{username:value.username}
+            where: { username: value.username }
         })
         // console.log(checkUsername)
-        if(!!checkUsername){
-            res.status(400).json({message:"This user already used",fieldError: 'username'})
+        if (!!checkUsername) {
+            res.status(400).json({ message: "This user already used", fieldError: 'username' })
         }
 
         const checkEmail = await prisma.user.findUnique({
-            where:{email:value.email}
+            where: { email: value.email }
         })
-        if(!!checkEmail){
-            res.status(400).json({message:"This email already used",fieldError:'email'})
+        if (!!checkEmail) {
+            res.status(400).json({ message: "This email already used", fieldError: 'email' })
         }
 
         const checkmobilePhone = await prisma.user.findUnique({
-            where:{mobilePhone:value.mobilePhone}
+            where: { mobilePhone: value.mobilePhone }
         })
-        if(!!checkmobilePhone){
-            res.status(400).json({message:"This mobilePhone already used",fieldError:'mobilePhone'})
+        if (!!checkmobilePhone) {
+            res.status(400).json({ message: "This mobilePhone already used", fieldError: 'mobilePhone' })
         }
 
 
@@ -38,7 +38,7 @@ exports.register = async (req, res, next) => {
         await prisma.user.create({
             data: value
         })
-        res.status(201).json({ message:"Registed" })
+        res.status(201).json({ message: "Registed" })
     } catch (error) {
         next(error)
         // res.status(400).json({ message: 'Not success' });
@@ -50,17 +50,25 @@ exports.login = async (req, res, next) => {
         if (error) {
             return next(error)
         }
-        const user = await prisma.user.findUnique({
-            where:{username:value.username}                  
-        })
-       
-        if(!user){
-            return next(createError('invalid creadential',400))
-        }
 
+        const userCheck = await prisma.user.findUnique({
+            where: { username: value.username }
+        })
+        console.log(userCheck)
+        if (!userCheck) {
+            return res.status(400).json({ message: "Username and Password is not exist", fieldError: 'username' })
+        }
+        
+        const user = await prisma.user.findUnique({
+            where: { username: value.username }
+        })
+        if (!user) {
+            return next(createError('invalid credential', 400))
+        }
+        // console.log(value)
         const Matched = await bcrypt.compare(value.password, user.password);
-        if(!Matched){
-            return next(createError('invalid credential',400))
+        if (!Matched) {
+            return res.status(400).json({ message: "Username and Password is not exist", fieldError: 'password' })
         }
         const payload = { userId: user.id }
         const accessToken = jwt.sign(
@@ -69,10 +77,14 @@ exports.login = async (req, res, next) => {
             {
                 expiresIn: process.env.JWT_EXPIRE
             }
-        )
-        delete user.password;
-        res.status(201).json({accessToken,user})
+            )
+            delete user.password;
+        res.status(201).json({ accessToken, user })
     } catch (error) {
         next(error)
     }
+}
+
+exports.getMe = (req,res) => {
+    res.status(200).json({user:req.user})
 }

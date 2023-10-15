@@ -12,8 +12,11 @@ const app = express();
 app.use(cors())
 app.use(morgan('manga'))
 app.use(express.json())
+app.use(express.static('public'));
+
 
 app.use('/user',userRoute)
+
 
 
 const PORT = process.env.PORT || 1000;
