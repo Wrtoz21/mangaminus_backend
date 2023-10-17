@@ -20,7 +20,7 @@ model User {
   username       String            @unique
   password       String
   email          String            @unique
-  mobilePhone    String               @unique
+  mobilePhone    String            @unique
   userRole       userPermit        @default(USER)
   profileImage   String?
   prchasedByUser PurchasedByUser[]
@@ -66,13 +66,11 @@ model UserWallet {
 }
 
 model CoinExchange {
-  id             Int          @id @default(autoincrement())
-  userWalletId   Int          @unique
-  userWallet     UserWallet   @relation(fields: [userWalletId], references: [id])
-  exchangeRateId Int          @unique
-  exchangeRate   ExchangeRate @relation(fields: [exchangeRateId], references: [id])
-  payment        Payment      @relation(fields: [paymentId], references: [id])
-  paymentId      Int
+  id           Int        @id @default(autoincrement())
+  userWallet   UserWallet @relation(fields: [userWalletId], references: [id])
+  userWalletId Int        
+  payment      Payment    @relation(fields: [paymentId], references: [id])
+  paymentId    Int
 }
 
 enum userCheckPaymentStatus {
@@ -81,20 +79,20 @@ enum userCheckPaymentStatus {
 }
 
 model ExchangeRate {
-  id               Int            @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   bath             Int
   coin             Int
-  createAt         DateTime       @default(now())
-  exchangeUpdateAt DateTime       @updatedAt
-  coinExchange     CoinExchange[]
+  createAt         DateTime @default(now())
+  exchangeUpdateAt DateTime @updatedAt
+  // coinExchange     CoinExchange[]
 }
 
 model Payment {
   id                Int                    @id @default(autoincrement())
   paymentImage      String
-  userPaymentNumber userCheckPaymentStatus
-  BankName          String
-  BankNumber        Int
+  userPaymentStatus userCheckPaymentStatus @default(CHECKING)
+  // BankName          String
+  // BankNumber        Int
   updateAccout      DateTime               @updatedAt
   coinExchange      CoinExchange[]
 }

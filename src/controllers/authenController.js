@@ -33,11 +33,18 @@ exports.register = async (req, res, next) => {
             res.status(400).json({ message: "This mobilePhone already used", fieldError: 'mobilePhone' })
         }
 
-
         value.password = await bcrypt.hash(value.password, 10)
-        await prisma.user.create({
-            data: value
+        const userAid= await prisma.user.create({
+            data: value,
         })
+        if(userAid){
+            await prisma.UserWallet.create({
+                data:{
+                    userId:userAid.id
+                }
+            })
+        }
+        
         res.status(201).json({ message: "Registed" })
     } catch (error) {
         next(error)
