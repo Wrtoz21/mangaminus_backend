@@ -34,17 +34,17 @@ exports.register = async (req, res, next) => {
         }
 
         value.password = await bcrypt.hash(value.password, 10)
-        const userAid= await prisma.user.create({
+        const userAid = await prisma.user.create({
             data: value,
         })
-        if(userAid){
+        if (userAid) {
             await prisma.UserWallet.create({
-                data:{
-                    userId:userAid.id
+                data: {
+                    userId: userAid.id
                 }
             })
         }
-        
+
         res.status(201).json({ message: "Registed" })
     } catch (error) {
         next(error)
@@ -61,18 +61,20 @@ exports.login = async (req, res, next) => {
         const userCheck = await prisma.user.findUnique({
             where: { username: value.username }
         })
-        console.log(userCheck)
         if (!userCheck) {
             return res.status(400).json({ message: "Username and Password is not exist", fieldError: 'username' })
         }
-        
+
         const user = await prisma.user.findUnique({
             where: { username: value.username }
         })
+
+
         if (!user) {
             return next(createError('invalid credential', 400))
         }
-        // console.log(value)
+        // console.log(user)
+
         const Matched = await bcrypt.compare(value.password, user.password);
         if (!Matched) {
             return res.status(400).json({ message: "Username and Password is not exist", fieldError: 'password' })
@@ -84,14 +86,37 @@ exports.login = async (req, res, next) => {
             {
                 expiresIn: process.env.JWT_EXPIRE
             }
-            )
-            delete user.password;
+        )
+        delete user.password;
         res.status(201).json({ accessToken, user })
     } catch (error) {
         next(error)
     }
 }
 
-exports.getMe = (req,res) => {
-    res.status(200).json({user:req.user})
+exports.getMe = async (req, res, next) => {
+    try {
+        const findAdmin = await prisma.user.findMany({
+            where: { userRole: "USER" },
+            include: {
+                userWallet: {
+                    include: { Payment: true }
+                }
+            }
+        })
+   
+        const wallet = await prisma.userWallet.findMany({
+            include:{
+                user:true
+            }
+        })
+        
+        const payment = await prisma.payment.findMany({
+            
+        })
+        
+        res.status(200).json({ user: req.user, findAdmin ,wallet, payment})
+    } catch (error) {
+        next(error)
+    }
 }

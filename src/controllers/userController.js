@@ -9,17 +9,19 @@ exports.getUserById = async (req,res,next) => {
             return next(error);
         }
         const userId = +req.params.userProfileId
-        console.log(userId)
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
             where:{id:userId}
-        });
-        // let status = null;
-        // let friends = null;
+            });
+            console.log(user)
+            const wallet = await prisma.userWallet.findFirst({
+                where:{userId:user.id}
+            })
         if(user){
             delete user.password;
         }
-        res.status(200).json({user})
+        res.status(200).json({user,wallet})
     }catch(err){
         next(err)
     }
 }
+

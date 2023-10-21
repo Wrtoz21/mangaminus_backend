@@ -40,11 +40,21 @@ model PurchasedByUser {
 
 model Manga {
   id              Int               @id @default(autoincrement())
-  mangaName       String?           @unique
+  mangaName       String?
   mangaPrice      Int
   updateAt        DateTime          @updatedAt
   createAt        DateTime          @default(now())
+  mangaPage       String
   PurchasedByUser PurchasedByUser[]
+}
+
+model MangaWriter {
+  id         Int      @id @default(autoincrement())
+  writeName  String
+  imageCover String?
+  detail     String
+  updateAt   DateTime @updatedAt
+  createAt   DateTime @default(now())
 }
 
 model Comment {
@@ -56,21 +66,13 @@ model Comment {
 }
 
 model UserWallet {
-  id           Int            @id @default(autoincrement())
-  userCoin     Int            @default(0)
-  userMoney    Int            @default(0)
-  updateAt     DateTime       @updatedAt
-  userId       Int
-  user         User           @relation(fields: [userId], references: [id])
-  coinExchange CoinExchange[]
-}
-
-model CoinExchange {
-  id           Int        @id @default(autoincrement())
-  userWallet   UserWallet @relation(fields: [userWalletId], references: [id])
-  userWalletId Int        
-  payment      Payment    @relation(fields: [paymentId], references: [id])
-  paymentId    Int
+  id        Int       @id @default(autoincrement())
+  userCoin  Int       @default(0)
+  userMoney Int       @default(0)
+  updateAt  DateTime  @updatedAt
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  Payment   Payment[]
 }
 
 enum userCheckPaymentStatus {
@@ -94,5 +96,6 @@ model Payment {
   // BankName          String
   // BankNumber        Int
   updateAccout      DateTime               @updatedAt
-  coinExchange      CoinExchange[]
+  userWallet        UserWallet             @relation(fields: [userWalletId], references: [id])
+  userWalletId      Int
 }

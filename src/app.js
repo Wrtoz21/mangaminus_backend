@@ -5,7 +5,9 @@ const morgan  = require('morgan')
 console.clear()
 
 const userRoute = require('./routes/user-route');
-const exchangeRoute = require('./routes/exchangeRoute')
+const exchangeRoute = require('./routes/exchangeRoute');
+const adminRoute = require('./routes/adminRoute');
+const mangaRoute = require('./routes/mangaRoute')
 
 const app = express();
 
@@ -17,9 +19,12 @@ app.use(express.static('public'));
 
 app.use('/user',userRoute)
 app.use('/coin-exchange',exchangeRoute)
+app.use('/admin',adminRoute)
+app.use('/manga',mangaRoute)
 
 
 
 
-const PORT = process.env.PORT || 1000;
+
+const PORT = process.env.PORT || 8000;
 app.listen(PORT,() => console.log(`server running on port:${PORT}`))
