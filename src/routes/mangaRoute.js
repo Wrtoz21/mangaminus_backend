@@ -4,5 +4,6 @@ const mangaController = require('../controllers/mangaController')
 
 
 router.get('/mangaAll',mangaController.manga)
+router.get('/:mangaName',mangaController.getManga)
 
 module.exports = router;

@@ -34,27 +34,47 @@ model PurchasedByUser {
   createdAt     DateTime @default(now())
   userId        Int
   user          User     @relation(fields: [userId], references: [id])
-  mangaId       Int?
-  manga         Manga?   @relation(fields: [mangaId], references: [id])
 }
 
-model Manga {
-  id              Int               @id @default(autoincrement())
-  mangaName       String?
-  mangaPrice      Int
-  updateAt        DateTime          @updatedAt
-  createAt        DateTime          @default(now())
-  mangaPage       String
-  PurchasedByUser PurchasedByUser[]
+// model Manga {
+//   id              Int               @id @default(autoincrement())
+//   mangaName       String?
+//   mangaPrice      Int?
+//   updateAt        DateTime          @updatedAt
+//   createAt        DateTime          @default(now())
+//   mangaPage       String?
+//   episode         Int?
+//   writerName      String?
+//   imageCover      String?
+//   detail          String?
+//   PurchasedByUser PurchasedByUser[]
+// }
+model Writer {
+  id         Int    @id @default(autoincrement())
+  writerName String @unique
+
+  MangaNameNCover MangaNameNCover[]
 }
 
-model MangaWriter {
-  id         Int      @id @default(autoincrement())
-  writeName  String
-  imageCover String?
+model MangaNameNCover {
+  id         Int    @id @default(autoincrement())
+  mangaName  String @unique
+  mangaCover String
   detail     String
-  updateAt   DateTime @updatedAt
-  createAt   DateTime @default(now())
+
+  writer       Writer         @relation(fields: [writerId], references: [id])
+  writerId     Int
+  MangaEpisode MangaEpisode[]
+}
+
+model MangaEpisode {
+  id                Int             @id @default(autoincrement())
+  episode           Int
+  mangaSrc          String
+  page              Int
+  mangaPrice        Int?
+  mangaNameNCover   MangaNameNCover @relation(fields: [mangaNameNCoverId], references: [id])
+  mangaNameNCoverId Int
 }
 
 model Comment {

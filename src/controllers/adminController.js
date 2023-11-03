@@ -12,29 +12,63 @@ exports.upload = async (req, res, next) => {
         if (!req.files) {
             return next(createError("Please Check your files"))
         }
-        const urlCover = await upload(req.files.mangaPic[0].path)
+        const urlCover = await upload(req.files?.mangaPic[0].path)
+
+        await prisma.mangaNameNCover.create({
+            data: {
+                writer: {
+                    create: {
+                        writerName: req.body.writerName
+                    }
+                },
+                mangaName: req.body.mangaName,
+                mangaCover: urlCover,
+                detail: req.body.discribe
+            }
+        });
+
+
+
+
+        res.status(200).json("Upload Success")
+
+    } catch (err) {
+        next(err)
+    }
+}
+exports.uploadEpisode = async (req, res, next) => {
+    try {
+        console.log(req.body)
+        if (!req.body) {
+            return next(createError("Please Check your texts"))
+        }
+
+        if (!req.files) {
+            return next(createError("Please Check your files"))
+        }
+        const findManga = await prisma.mangaNameNCover.findFirst({
+            where: {
+                mangaName:req.body.mangaName
+            }
+        })
+        console.log(req.body.mangaName)
+        console.log(findManga)
         const urlPage = await upload(req.files.mangaPicPage[0].path)
-        console.log(typeof (urlPage))
 
-
-            await prisma.mangaWriter.create({
+        if (req.body.mangaName === findManga.mangaName) {
+            console.log(req.body.mangaPrice)
+            await prisma.mangaEpisode.create({
                 data: {
-                    writeName: req.body.writerName,
-                    imageCover: urlCover,
-                    detail: req.body.discribe
-                }
-            })
-        
-
-        if (urlPage) {
-            await prisma.manga.create({
-                data: {
-                    mangaName: req.body.mangaName,
-                    mangaPrice: +req.body.mangaPrice,
-                    mangaPage: urlPage,
+                    // mangaName: req.body.mangaName,
+                    // mangaPrice: +req.body.mangaPrice,
+                    mangaSrc: urlPage,
+                    episode: +req.body.episode,
+                    page: +req.body.numberPage,
+                    mangaNameNCoverId:findManga.id
                 }
             })
         }
+
 
         res.status(200).json("Upload Success")
 
@@ -43,9 +77,8 @@ exports.upload = async (req, res, next) => {
     }
 }
 
-//userCoin: req.body.coin.Coin
 exports.adminUpdate = async (req, res, next) => {
-    // console.log(+req.body.userSelect.User)
+
     try {
         await prisma.userWallet.update({
             where: {
